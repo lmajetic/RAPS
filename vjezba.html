@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vježba</title>
+</head>
+<body>
+    
+    <form id="forma" action="" method="post">
+
+        Ime: <input type="text" name="ime"><br>
+        Prezime: <input type="text" name="prezime"><br>
+        Lozinka: <input type="password" name="lozinka"><br>
+        <button type="submit">Pošalji</button>
+
+        <script>
+            document.getElementById("forma").addEventListener("submit", function (event) {
+
+        
+            const ime = document.getElementById("ime").value;
+            const prezime = document.getElementById("prezime").value;
+            const lozinka = document.getElementById("lozinka").value;
+
+            if(ime===null || prezime===null || lozinka===null){
+                alert("Jedan podatak je prazan");
+                event.preventDefault();
+            }
+            else{
+                alert("Uspjeh");
+            }
+        });
+
+        </script>
+        
+    </form>
+
+</body>
+</html>
