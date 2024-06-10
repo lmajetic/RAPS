@@ -9,4 +9,4 @@ handlers:
 - url: /audio/(.*\.mp3)
   static_files: audio/\1
   upload: audio/(.*\.mp3)
-  mime_type: audio/mpeg  # MIME type for MP3 filess
+  mime_type: audio/mpeg  # MIME type for MP3 files
