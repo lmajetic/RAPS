@@ -1,0 +1,12 @@
+runtime: nodejs20
+env: standard
+
+handlers:
+- url: /static
+  static_dir: static
+  mime_type: text/plain  # Default MIME type for static files
+
+- url: /audio/(.*\.mp3)
+  static_files: audio/\1
+  upload: audio/(.*\.mp3)
+  mime_type: audio/mpeg  # MIME type for MP3 files

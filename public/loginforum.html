@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 35%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        input[type="button"] {
+            background-color: #b7b9b7;
+            color: #080606;
+            border: none;
+            
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 16px;
+            width: 30%;
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="button"]:hover {
+            background-color: #d9dfda;
+            width: 30%;
+        }
+        input:focus{
+            background-color: #b6bdb3;
+        }
+    </style>
+</head>
+<body>
+    <form id="loginForm">
+        <fieldset>
+            <legend>Login</legend>
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div>
+                <button type="button" onclick="validateForm()">Submit</button>
+            </div>
+        </fieldset>
+    </form>
+
+    <script>
+        function validateForm() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!username || !email || !password) {
+                alert("All fields are required.");
+                return;
+            }
+
+            if (username.length < 2) {
+                alert("Username must be at least 2 characters long.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            // Create a FormData object to send data to the server
+            const formData = {
+                username: username,
+                email: email,
+                password: password
+            };
+
+            // Send the form data to the server
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Login successful!");
+                    // Redirect to radioKarta.html
+                    window.location.href = '/radioKarta.html';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
