@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const path = require('path');
 
