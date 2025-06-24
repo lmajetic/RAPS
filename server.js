@@ -3,7 +3,6 @@ const mysql = require('mysql');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const path = require('path');
-const request = require('request');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -69,18 +68,6 @@ app.post('/register', (req, res) => {
             });
         }
     });
-});
-
-app.get('/proxy', (req, res) => {
-  const url = decodeURIComponent(req.query.url);
-  if (!url.startsWith('http')) return res.status(400).send('Invalid URL');
-  
-  request(url)
-    .on('error', err => {
-      console.error('Proxy stream error:', err);
-      res.status(500).send('Stream proxy error');
-    })
-    .pipe(res);
 });
 
 // Add favorite radio station

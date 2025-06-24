@@ -37,7 +37,9 @@ window.onload = function() {
                     <p>Language: ${station.Language}</p>
                     <button id="toggleFavorite">Toggle Favorite</button>
                 `;
-                playStationStream(station.Source1);
+                document.getElementById('audioSource').src = station.Source1;
+                document.getElementById('audioPlayer').load();
+                document.getElementById('audioPlayer').play();
                 document.getElementById('toggleFavorite').addEventListener('click', () => {
                     toggleFavorite(station.Title);
                 });
@@ -233,7 +235,9 @@ window.onload = function() {
                         <p>Language: ${station.Language}</p>
                         <button id="toggleFavorite">Toggle Favorite</button>
                     `;
-                    playStationStream(station.Source1);
+                    document.getElementById('audioSource').src = station.Source1;
+                    document.getElementById('audioPlayer').load();
+                    document.getElementById('audioPlayer').play();
                     document.getElementById('toggleFavorite').addEventListener('click', () => {
                         toggleFavorite(station.Title);
                     });
@@ -292,32 +296,6 @@ window.onload = function() {
             })
             .catch(err => console.error('Error loading favorites:', err));
     }
-
-    const audioPlayer = document.getElementById('audioPlayer');
-    const audioSource = document.getElementById('audioSource');
-
-    function playStationStream(url) {
-        // First try direct stream
-        audioSource.src = url;
-        audioPlayer.load();
-
-        // Set fallback on error
-        audioPlayer.onerror = () => {
-            console.warn('Direct stream failed, retrying via proxy...');
-
-            // Retry using proxy
-            audioSource.src = `/proxy?url=${encodeURIComponent(url)}`;
-            audioPlayer.load();
-
-            // Remove the error handler to avoid infinite loop
-            audioPlayer.onerror = null;
-        };
-
-        audioPlayer.play().catch(err => {
-            console.error('Initial playback error:', err);
-        });
-    }
-
 
     // Initial display of all stations
     filterStations();
