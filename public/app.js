@@ -1,11 +1,53 @@
 window.onload = function() {
-    // Initialize the map
+    // Initialize map
     var map = L.map('map').setView([45.1, 15.2], 6);
 
     // Add a tile layer to the map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+
+
+    // Function to display stations in the clicked city
+    function displayStationsInCity(cityName) {
+        const stationsContainer = document.getElementById('stations');
+        stationsContainer.innerHTML = '';
+
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedGenre = genreDropdown.value;
+        const showFavoritesOnly = favoritesCheckbox.checked;
+
+        const filteredStations = radioStations.filter(station =>
+            extractCityName(station.Title) === cityName &&
+            station.Title.toLowerCase().includes(searchTerm) &&
+            (selectedGenre === "" || station.Genre === selectedGenre) &&
+            (!showFavoritesOnly || userFavorites.includes(station.Title))
+        );
+
+        filteredStations.forEach(station => {
+            const stationDiv = document.createElement('div');
+            stationDiv.classList.add('stationItem');
+            stationDiv.textContent = station.Title;
+            stationDiv.addEventListener('click', function () {
+                document.getElementById('stationDetails').innerHTML = `
+                    <h3>${station.Title}</h3>
+                    <p>Description: ${station.Description}</p>
+                    <p>Genre: ${station.Genre}</p>
+                    <p>Country: ${station.Country}</p>
+                    <p>Language: ${station.Language}</p>
+                    <button id="toggleFavorite">Toggle Favorite</button>
+                `;
+                document.getElementById('audioSource').src = station.Source1;
+                document.getElementById('audioPlayer').load();
+                document.getElementById('audioPlayer').play();
+                document.getElementById('toggleFavorite').addEventListener('click', () => {
+                    toggleFavorite(station.Title);
+                });
+            });
+            stationsContainer.appendChild(stationDiv);
+        });
+    }
+
 
     // List of predefined cities
     const cities = {
@@ -121,33 +163,6 @@ window.onload = function() {
         return Object.keys(cities).find(city => title.includes(city));
     }
 
-    // Function to display stations in the clicked city
-    function displayStationsInCity(cityName) {
-        const stationsContainer = document.getElementById('stations');
-        stationsContainer.innerHTML = ''; // Clear the container
-        const filteredStations = radioStations.filter(station =>
-            extractCityName(station.Title) === cityName
-        );
-        filteredStations.forEach(station => {
-            const stationDiv = document.createElement('div');
-            stationDiv.classList.add('stationItem');
-            stationDiv.textContent = station.Title;
-            stationDiv.addEventListener('click', function () {
-                document.getElementById('stationDetails').innerHTML = `
-                    <h3>${station.Title}</h3>
-                    <p>Description: ${station.Description}</p>
-                    <p>Genre: ${station.Genre}</p>
-                    <p>Country: ${station.Country}</p>
-                    <p>Language: ${station.Language}</p>
-                `;
-                document.getElementById('audioSource').src = station.Source1;
-                document.getElementById('audioPlayer').load();
-                document.getElementById('audioPlayer').play();
-            });
-            stationsContainer.appendChild(stationDiv);
-        });
-    }
-
     // Populate genre dropdown
     const genreDropdown = document.getElementById('genreDropdown');
     const genres = [...new Set(radioStations.map(station => station.Genre))].sort();
@@ -160,15 +175,15 @@ window.onload = function() {
 
     // Use the imported radio stations data
     radioStations.forEach(station => {
-        // Extract city name from the title
+        // Defined extractCityName function called
         const cityName = extractCityName(station.Title);
         if (cityName) {
             const coordinates = cities[cityName];
-            // Create a marker for each station with coordinates
+            // Create a marker
             var marker = L.marker(coordinates).addTo(map);
             marker.bindPopup(`<b>${cityName}</b><br>${station.Country}`);
 
-            // Add a click event to display stations in the clicked city
+            // Add a click event to displayed stations in the clicked city
             marker.on('click', function() {
                 displayStationsInCity(cityName);
             });
@@ -181,17 +196,30 @@ window.onload = function() {
     const stationsContainer = document.getElementById('stations');
     const searchInput = document.getElementById('searchBox');
 
-    // Function to filter radio stations
+    // Filter stations
     function filterStations() {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedGenre = genreDropdown.value;
-        stationsContainer.innerHTML = ''; // Clear the container
-        // Filter stations based on search term and genre
-        const filteredStations = radioStations.filter(station =>
+        const showFavoritesOnly = favoritesCheckbox.checked;
+        const sortOrder = document.getElementById('sortOrder').value;
+
+        stationsContainer.innerHTML = '';
+
+        let filteredStations = radioStations.filter(station =>
             station.Title.toLowerCase().includes(searchTerm) &&
-            (selectedGenre === '' || station.Genre === selectedGenre)
+            (selectedGenre === "" || station.Genre === selectedGenre) &&
+            (!showFavoritesOnly || userFavorites.includes(station.Title))
         );
-        // Create list items for filtered stations
+
+        // Sort stations
+        filteredStations.sort((a, b) => {
+            const titleA = a.Title.toLowerCase();
+            const titleB = b.Title.toLowerCase();
+            return sortOrder === 'asc'
+                ? titleA.localeCompare(titleB)
+                : titleB.localeCompare(titleA);
+        });
+
         filteredStations.forEach(station => {
             const cityName = extractCityName(station.Title);
             if (cityName) {
@@ -205,45 +233,68 @@ window.onload = function() {
                         <p>Genre: ${station.Genre}</p>
                         <p>Country: ${station.Country}</p>
                         <p>Language: ${station.Language}</p>
+                        <button id="toggleFavorite">Toggle Favorite</button>
                     `;
                     document.getElementById('audioSource').src = station.Source1;
                     document.getElementById('audioPlayer').load();
                     document.getElementById('audioPlayer').play();
+                    document.getElementById('toggleFavorite').addEventListener('click', () => {
+                        toggleFavorite(station.Title);
+                    });
                 });
                 stationsContainer.appendChild(stationDiv);
             }
         });
     }
 
-    function displayStationsByGenre() {
-        const selectedGenre = genreDropdown.value;
-        stationsContainer.innerHTML = ''; // Clear the container
-        // Filter stations based on selected genre
-        const filteredStations = radioStations.filter(station =>
-            selectedGenre === "" || station.Genre === selectedGenre
-        );
-        // Create list items for filtered stations
-        filteredStations.forEach(station => {
-            const cityName = extractCityName(station.Title);
-            if (cityName) {
-                const stationDiv = document.createElement('div');
-                stationDiv.classList.add('stationItem');
-                stationDiv.textContent = station.Title;
-                stationDiv.addEventListener('click', function () {
-                    document.getElementById('stationDetails').innerHTML = `
-                        <h3>${station.Title}</h3>
-                        <p>Description: ${station.Description}</p>
-                        <p>Genre: ${station.Genre}</p>
-                        <p>Country: ${station.Country}</p>
-                        <p>Language: ${station.Language}</p>
-                    `;
-                    document.getElementById('audioSource').src = station.Source1;
-                    document.getElementById('audioPlayer').load();
-                    document.getElementById('audioPlayer').play();
-                });
-                stationsContainer.appendChild(stationDiv);
+
+    function toggleFavorite(title) {
+        if (!userId) {
+            alert('You need to log in first!');
+            return;
+        }
+    
+        const isFavorite = userFavorites.includes(title);
+        const url = isFavorite ? '/favorites/remove' : '/favorites/add';
+    
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, radioStation: title })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (isFavorite) {
+                    userFavorites = userFavorites.filter(t => t !== title);
+                } else {
+                    userFavorites.push(title);
+                }
+                filterStations();
             }
-        });
+        })
+        .catch(err => console.error('Error toggling favorite:', err));
+    }
+
+
+    let userId = sessionStorage.getItem('userId');
+    let userFavorites = [];
+    const favoritesCheckbox = document.getElementById('favoritesOnly');
+    loadFavorites();
+
+    // Load favorites for this user
+    function loadFavorites() {
+        if (!userId) return;
+
+        fetch(`/favorites/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    userFavorites = data.favorites;
+                    filterStations(); 
+                }
+            })
+            .catch(err => console.error('Error loading favorites:', err));
     }
 
     // Initial display of all stations
@@ -251,5 +302,10 @@ window.onload = function() {
 
     // Event listeners for input change and genre selection
     searchInput.addEventListener('input', filterStations);
-    genreDropdown.addEventListener('change', displayStationsByGenre);
+    favoritesCheckbox.addEventListener('change', () => {
+        filterStations();
+    });
+    document.getElementById('sortOrder').addEventListener('change', filterStations);
+
+
 };

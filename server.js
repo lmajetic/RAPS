@@ -70,6 +70,57 @@ app.post('/register', (req, res) => {
     });
 });
 
+// Add favorite radio station
+app.post('/favorites/add', (req, res) => {
+    const { userId, radioStation } = req.body;
+
+    if (!userId || !radioStation) {
+        return res.status(400).json({ success: false, message: 'Missing userId or station.' });
+    }
+
+    const query = 'INSERT INTO RadioFav (Radio_station, email) VALUES (?, ?)';
+    db.query(query, [radioStation, userId], (err, result) => {
+        if (err) {
+            console.error('Error adding favorite:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+        res.json({ success: true, message: 'Station added to favorites.' });
+    });
+});
+
+// Remove favorite radio station
+app.post('/favorites/remove', (req, res) => {
+    const { userId, radioStation } = req.body;
+
+    if (!userId || !radioStation) {
+        return res.status(400).json({ success: false, message: 'Missing userId or station.' });
+    }
+
+    const query = 'DELETE FROM RadioFav WHERE email = ? AND Radio_station = ?';
+    db.query(query, [userId, radioStation], (err, result) => {
+        if (err) {
+            console.error('Error removing favorite:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+        res.json({ success: true, message: 'Station removed from favorites.' });
+    });
+});
+
+// Get favorites for a user
+app.get('/favorites/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    const query = 'SELECT Radio_station FROM RadioFav WHERE email = ?';
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching favorites:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+        const stations = results.map(row => row.Radio_station);
+        res.json({ success: true, favorites: stations });
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });
