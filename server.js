@@ -2,7 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
-const path = require('path');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -106,7 +106,7 @@ app.post('/favorites/remove', (req, res) => {
     });
 });
 
-// Get favorites for a user
+// Get favorites
 app.get('/favorites/:userId', (req, res) => {
     const userId = req.params.userId;
 
